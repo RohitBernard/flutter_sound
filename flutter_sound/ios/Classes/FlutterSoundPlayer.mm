@@ -61,6 +61,11 @@
        [self invokeMethod: @"pausePlayerCompleted" boolArg: success success: success];
 }
 
+- (void)flushPlayerCompleted: (bool)success
+{
+       [self invokeMethod: @"flushPlayerCompleted" boolArg: success success: success];
+}
+
 - (void)resumePlayerCompleted: (bool)success
 {
        [self invokeMethod: @"resumePlayerCompleted" boolArg: success success: success];
@@ -286,6 +291,14 @@
         }
         [self log: DBG msg: @"IOS:<-- pausePlayer"];
 
+}
+
+- (void)flushPlayer:(FlutterResult)result
+{
+        [self log: DBG msg: @"IOS:--> flushPlayer"];
+        [flautoPlayer flushPlayer];
+        result([self getPlayerStatus]);
+        [self log: DBG msg: @"IOS:<-- flushPlayer"];
 }
 
 - (void)resumePlayer:(FlutterResult)result

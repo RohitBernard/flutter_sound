@@ -133,6 +133,11 @@ extern void FlutterSoundPlayerReg(NSObject<FlutterPluginRegistrar>* registrar)
                 [aFlautoPlayer pausePlayer: result];
         } else
 
+        if ([@"flushPlayer" isEqualToString: call.method])
+        {
+                [aFlautoPlayer flushPlayer: result];
+        } else
+
         if ([@"resumePlayer" isEqualToString: call.method])
         {
                 [aFlautoPlayer resumePlayer: result];

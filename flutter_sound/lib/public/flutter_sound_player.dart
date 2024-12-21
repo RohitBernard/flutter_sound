@@ -122,6 +122,7 @@ class FlutterSoundPlayer implements FlutterSoundPlayerCallback {
   Completer<void>? _stopPlayerCompleter;
   Completer<void>? _closePlayerCompleter;
   Completer<FlutterSoundPlayer>? _openPlayerCompleter;
+  Completer<void>? _flushPlayerCompleter;
 
   /// Instanciate a new Flutter Sound player.
   /// The optional paramater `Level logLevel` specify the Logger Level you are interested by.
@@ -249,6 +250,25 @@ class FlutterSoundPlayer implements FlutterSoundPlayerCallback {
     }
     _pausePlayerCompleter = null;
     _logger.d('<--- pausePlayerCompleted: $success');
+  }
+
+  /// Callback from the &tau; Core. Must not be called by the App
+  /// @nodoc
+  @override
+  void flushPlayerCompleted(int state, bool success) {
+    _logger.d('---> flushPlayerCompleted: $success');
+    if (_flushPlayerCompleter == null) {
+      _logger.e('Error : cannot process _flushPlayerCompleter');
+      return;
+    }
+    _playerState = PlayerState.values[state];
+    if (success) {
+      _flushPlayerCompleter!.complete();
+    } else {
+      _flushPlayerCompleter!.completeError('flushPlayer failed');
+    }
+    _flushPlayerCompleter = null;
+    _logger.d('<--- flushPlayerCompleted: $success');
   }
 
   /// Callback from the &tau; Core. Must not be called by the App
@@ -1124,6 +1144,36 @@ class FlutterSoundPlayer implements FlutterSoundPlayerCallback {
     }
 
     _logger.d('FS:<--- _stop ');
+    return completer!.future;
+  }
+
+  Future<void> flushPlayer() async {
+    await _lock.synchronized(() async {
+      await _flushPlayer();
+    });
+  }
+
+  Future<void> _flushPlayer() async {
+    _logger.d('FS:---> _flushPlayer ');
+    await _waitOpen();
+    if (_isInited != Initialized.fullyInitialized) {
+      throw Exception('Player is not open');
+    }
+
+    Completer<void>? completer;
+    if (_flushPlayerCompleter != null) {
+      _logger.w('Killing another flushPlayer()');
+      _flushPlayerCompleter!.completeError('Killed by another flushPlayer()');
+    }
+    try {
+      _flushPlayerCompleter = Completer<void>();
+      completer = _flushPlayerCompleter;
+      await FlutterSoundPlayerPlatform.instance.flushPlayer(this);
+    } on Exception {
+      _flushPlayerCompleter = null;
+      rethrow;
+    }
+    _logger.d('FS:<--- _flushPlayer ');
     return completer!.future;
   }
 

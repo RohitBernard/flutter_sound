@@ -18,7 +18,6 @@ package com.dooboolab.fluttersound;
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,57 +29,55 @@ import com.dooboolab.TauEngine.FlautoPlayer;
 import com.dooboolab.TauEngine.FlautoPlayerCallback;
 import com.dooboolab.TauEngine.Flauto.*;
 
+public class FlutterSoundPlayer extends FlutterSoundSession implements FlautoPlayerCallback {
 
-public class FlutterSoundPlayer extends FlutterSoundSession implements  FlautoPlayerCallback
-{
-
-	static final String ERR_UNKNOWN           = "ERR_UNKNOWN";
-	static final String ERR_PLAYER_IS_NULL    = "ERR_PLAYER_IS_NULL";
+	static final String ERR_UNKNOWN = "ERR_UNKNOWN";
+	static final String ERR_PLAYER_IS_NULL = "ERR_PLAYER_IS_NULL";
 	static final String ERR_PLAYER_IS_PLAYING = "ERR_PLAYER_IS_PLAYING";
-	final static String           TAG         = "FlutterSoundPlugin";
-
+	final static String TAG = "FlutterSoundPlugin";
 
 	FlautoPlayer m_flautoPlayer;
 
-// =============================================================  callback ===============================================================
+	// ============================================================= callback
+	// ===============================================================
 
-	public void openPlayerCompleted(boolean success)
-	{
-		invokeMethodWithBoolean( "openPlayerCompleted", success, success );
-	}
-	public void closePlayerCompleted(boolean success)
-	{
-		invokeMethodWithBoolean( "closePlayerCompleted", success, success );
-	}
-	public void stopPlayerCompleted(boolean success)
-	{
-		invokeMethodWithBoolean( "stopPlayerCompleted", success, success );
-	}
-	public void pausePlayerCompleted(boolean success)
-	{
-		invokeMethodWithBoolean( "pausePlayerCompleted", success, success );
-	}
-	public void resumePlayerCompleted(boolean success)
-	{
-		invokeMethodWithBoolean( "resumePlayerCompleted", success, success );
+	public void openPlayerCompleted(boolean success) {
+		invokeMethodWithBoolean("openPlayerCompleted", success, success);
 	}
 
-	public void startPlayerCompleted (boolean success, long duration)
-	{
-		Map<String, Object> dico = new HashMap<String, Object> ();
-		dico.put( "duration", (int) duration);
-		dico.put( "state",  (int)getPlayerState());
-		invokeMethodWithMap( "startPlayerCompleted", success, dico);
+	public void closePlayerCompleted(boolean success) {
+		invokeMethodWithBoolean("closePlayerCompleted", success, success);
+	}
+
+	public void stopPlayerCompleted(boolean success) {
+		invokeMethodWithBoolean("stopPlayerCompleted", success, success);
+	}
+
+	public void pausePlayerCompleted(boolean success) {
+		invokeMethodWithBoolean("pausePlayerCompleted", success, success);
+	}
+
+	public void flushPlayerCompleted(boolean success) {
+		invokeMethodWithBoolean("flushPlayerCompleted", success, success);
+	}
+
+	public void resumePlayerCompleted(boolean success) {
+		invokeMethodWithBoolean("resumePlayerCompleted", success, success);
+	}
+
+	public void startPlayerCompleted(boolean success, long duration) {
+		Map<String, Object> dico = new HashMap<String, Object>();
+		dico.put("duration", (int) duration);
+		dico.put("state", (int) getPlayerState());
+		invokeMethodWithMap("startPlayerCompleted", success, dico);
 
 	}
 
-	public void needSomeFood (int ln)
-	{
+	public void needSomeFood(int ln) {
 		invokeMethodWithInteger("needSomeFood", true, ln);
 	}
 
-	public void updateProgress(long position, long duration)
-	{
+	public void updateProgress(long position, long duration) {
 		Map<String, Object> dic = new HashMap<String, Object>();
 		dic.put("position", position);
 		dic.put("duration", duration);
@@ -90,68 +87,55 @@ public class FlutterSoundPlayer extends FlutterSoundSession implements  FlautoPl
 
 	}
 
-	public void audioPlayerDidFinishPlaying (boolean flag)
-	{
-		invokeMethodWithInteger("audioPlayerFinishedPlaying", true, getPlayerState() );
+	public void audioPlayerDidFinishPlaying(boolean flag) {
+		invokeMethodWithInteger("audioPlayerFinishedPlaying", true, getPlayerState());
 	}
 
-	public void updatePlaybackState(t_PLAYER_STATE newState)
-	{
-		invokeMethodWithInteger( "updatePlaybackState", true, newState.ordinal() );
+	public void updatePlaybackState(t_PLAYER_STATE newState) {
+		invokeMethodWithInteger("updatePlaybackState", true, newState.ordinal());
 	}
 
+	// ========================================================================================================================================
 
-//========================================================================================================================================
-
-	/* ctor */ FlutterSoundPlayer (final MethodCall call)
-	{
-			m_flautoPlayer = new FlautoPlayer(this);
+	/* ctor */ FlutterSoundPlayer(final MethodCall call) {
+		m_flautoPlayer = new FlautoPlayer(this);
 	}
 
-	FlutterSoundManager getPlugin ()
-	{
+	FlutterSoundManager getPlugin() {
 		return FlutterSoundPlayerManager.flutterSoundPlayerPlugin;
 	}
 
-	int getStatus()
-	{
+	int getStatus() {
 		return getPlayerState();
 	}
 
-
-	void openPlayer ( final MethodCall call, final Result result )
-	{
+	void openPlayer(final MethodCall call, final Result result) {
 
 		boolean r = m_flautoPlayer.openPlayer();
 
-		if (r)
-		{
+		if (r) {
 
 			result.success(getPlayerState());
 		} else
-			result.error ( ERR_UNKNOWN, ERR_UNKNOWN, "Failure to open session");
+			result.error(ERR_UNKNOWN, ERR_UNKNOWN, "Failure to open session");
 
 	}
 
-	void closePlayer ( final MethodCall call, final Result result )
-	{
+	void closePlayer(final MethodCall call, final Result result) {
 		m_flautoPlayer.closePlayer();
-		result.success ( getPlayerState() );
+		result.success(getPlayerState());
 	}
 
-	void reset(final MethodCall call, final MethodChannel.Result result)
-	{
+	void reset(final MethodCall call, final MethodChannel.Result result) {
 		m_flautoPlayer.closePlayer();
-		result.success ( getPlayerState() );
+		result.success(getPlayerState());
 	}
 
-
-	int getPlayerState()
-	{
+	int getPlayerState() {
 		return m_flautoPlayer.getPlayerState().ordinal();
 	}
 
-	public void startPlayerFromMic ( final MethodCall call, final Result result ) {
+	public void startPlayerFromMic(final MethodCall call, final Result result) {
 		Integer _blockSize = 4096;
 		if (call.argument("blockSize") != null) {
 			_blockSize = call.argument("blockSize");
@@ -166,7 +150,7 @@ public class FlutterSoundPlayer extends FlutterSoundSession implements  FlautoPl
 			_numChannels = call.argument("numChannels");
 		}
 		try {
-			boolean b = m_flautoPlayer.startPlayerFromMic( _numChannels, _sampleRate, _blockSize);
+			boolean b = m_flautoPlayer.startPlayerFromMic(_numChannels, _sampleRate, _blockSize);
 			if (b)
 				result.success(getPlayerState());
 			else
@@ -177,8 +161,7 @@ public class FlutterSoundPlayer extends FlutterSoundSession implements  FlautoPl
 		}
 	}
 
-
-	public void startPlayer ( final MethodCall call, final Result result ) {
+	public void startPlayer(final MethodCall call, final Result result) {
 		// It me, Rohit
 		Integer _codec = call.argument("codec");
 		t_CODEC codec = t_CODEC.values()[(_codec != null) ? _codec : 0];
@@ -200,155 +183,128 @@ public class FlutterSoundPlayer extends FlutterSoundSession implements  FlautoPl
 
 		try {
 			boolean b = m_flautoPlayer.startPlayer(codec, _path, dataBuffer, _numChannels, _sampleRate, _blockSize);
-			if (b)
-			{
+			if (b) {
 				result.success(getPlayerState());
-			}
-			else
+			} else
 				result.error(ERR_UNKNOWN, ERR_UNKNOWN, "startPlayer() error");
 		} catch (Exception e) {
-			log(t_LOG_LEVEL.ERROR,  "startPlayer() exception");
+			log(t_LOG_LEVEL.ERROR, "startPlayer() exception");
 			result.error(ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage());
 		}
 	}
 
-	public void feed ( final MethodCall call, final Result result )
-	{
-		try
-		{
-			byte[] data = call.argument ( "data" );
+	public void feed(final MethodCall call, final Result result) {
+		try {
+			byte[] data = call.argument("data");
 
 			int ln = m_flautoPlayer.feed(data);
-			assert(ln >= 0);
-			result.success (ln);
-		} catch (Exception e)
-		{
-			log(t_LOG_LEVEL.ERROR,  "feed() exception" );
-			result.error ( ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage () );
+			assert (ln >= 0);
+			result.success(ln);
+		} catch (Exception e) {
+			log(t_LOG_LEVEL.ERROR, "feed() exception");
+			result.error(ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage());
 		}
 	}
 
-
-	public void stopPlayer ( final MethodCall call, final Result result )
-	{
+	public void stopPlayer(final MethodCall call, final Result result) {
 		m_flautoPlayer.stopPlayer();
-		result.success ( getPlayerState());
+		result.success(getPlayerState());
 	}
 
-
-
-	public void isDecoderSupported ( final MethodCall call, final Result result )
-	{
-		int     _codec = call.argument ( "codec" );
-		boolean b      = m_flautoPlayer.isDecoderSupported(t_CODEC.values()[_codec]);
-		result.success (b );
+	public void isDecoderSupported(final MethodCall call, final Result result) {
+		int _codec = call.argument("codec");
+		boolean b = m_flautoPlayer.isDecoderSupported(t_CODEC.values()[_codec]);
+		result.success(b);
 
 	}
 
-	public void pausePlayer ( final MethodCall call, final Result result )
-	{
-		try
-		{
+	public void pausePlayer(final MethodCall call, final Result result) {
+		try {
 			if (m_flautoPlayer.pausePlayer())
-				result.success ( getPlayerState());
+				result.success(getPlayerState());
 			else
-				result.error( ERR_UNKNOWN, ERR_UNKNOWN, "Pause failure");
-		}
-		catch ( Exception e )
-		{
-			log(t_LOG_LEVEL.ERROR, "pausePlay exception: " + e.getMessage () );
-			result.error ( ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage () );
+				result.error(ERR_UNKNOWN, ERR_UNKNOWN, "Pause failure");
+		} catch (Exception e) {
+			log(t_LOG_LEVEL.ERROR, "pausePlay exception: " + e.getMessage());
+			result.error(ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage());
 		}
 
 	}
 
-	public void resumePlayer ( final MethodCall call, final Result result )
-	{
-		try
-		{
+	public void resumePlayer(final MethodCall call, final Result result) {
+		try {
 			if (m_flautoPlayer.resumePlayer())
-				result.success ( getPlayerState());
+				result.success(getPlayerState());
 			else
-				result.error ( ERR_UNKNOWN, ERR_UNKNOWN, "Resume failure" );
-		}
-		catch ( Exception e )
-		{
-			log(t_LOG_LEVEL.ERROR, "mediaPlayer resume: " + e.getMessage () );
-			result.error ( ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage () );
+				result.error(ERR_UNKNOWN, ERR_UNKNOWN, "Resume failure");
+		} catch (Exception e) {
+			log(t_LOG_LEVEL.ERROR, "mediaPlayer resume: " + e.getMessage());
+			result.error(ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage());
 		}
 	}
 
-	public void seekToPlayer ( final MethodCall call, final Result result )
-	{
-		int millis = call.argument ( "duration" ) ;
+	public void flushPlayer(final MethodCall call, final Result result) {
+		try {
+			m_flautoPlayer.flushPlayer();
+			result.success(getPlayerState());
+		} catch (Exception e) {
+			log(t_LOG_LEVEL.ERROR, "flushPlayer() exception: " + e.getMessage());
+			result.error(ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage());
+		}
+	}
+
+	public void seekToPlayer(final MethodCall call, final Result result) {
+		int millis = call.argument("duration");
 
 		m_flautoPlayer.seekToPlayer(millis);
-		result.success (getPlayerState() );
+		result.success(getPlayerState());
 	}
 
-	public void setVolume ( final MethodCall call, final Result result )
-	{
-		try
-		{
+	public void setVolume(final MethodCall call, final Result result) {
+		try {
 			double volume = call.argument("volume");
 			m_flautoPlayer.setVolume(volume);
 			result.success(getPlayerState());
-		} catch(Exception e)
-		{
-			result.error ( ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage () );
+		} catch (Exception e) {
+			result.error(ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage());
 		}
 	}
 
-
-	public void setSpeed ( final MethodCall call, final Result result )
-	{
-		try
-		{
+	public void setSpeed(final MethodCall call, final Result result) {
+		try {
 			double speed = call.argument("speed");
 			m_flautoPlayer.setSpeed(speed);
 			result.success(getPlayerState());
-		} catch(Exception e)
-		{
-			result.error ( ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage () );
+		} catch (Exception e) {
+			result.error(ERR_UNKNOWN, ERR_UNKNOWN, e.getMessage());
 		}
 	}
 
-
-
-	public void setSubscriptionDuration ( final MethodCall call, Result result )
-	{
-		if ( call.argument ( "duration" ) != null )
-		{
+	public void setSubscriptionDuration(final MethodCall call, Result result) {
+		if (call.argument("duration") != null) {
 			int duration = call.argument("duration");
 			m_flautoPlayer.setSubscriptionDuration(duration);
 		}
-		result.success ( getPlayerState());
+		result.success(getPlayerState());
 	}
 
-
-	void getProgress ( final MethodCall call, final Result result )
-	{
+	void getProgress(final MethodCall call, final Result result) {
 		Map<String, Object> dic = m_flautoPlayer.getProgress();
-		dic.put ( "slotNo", slotNo);
+		dic.put("slotNo", slotNo);
 		result.success(dic);
 	}
 
-
-	void getResourcePath ( final MethodCall call, final Result result )
-	{
+	void getResourcePath(final MethodCall call, final Result result) {
 		// TODO
-		result.success ("");
+		result.success("");
 
 	}
 
-	void getPlayerState ( final MethodCall call, final Result result )
-	{
-		result.success (getPlayerState());
+	void getPlayerState(final MethodCall call, final Result result) {
+		result.success(getPlayerState());
 	}
 
-
-	public void setLogLevel (final MethodCall call, final MethodChannel.Result result )
-	{
+	public void setLogLevel(final MethodCall call, final MethodChannel.Result result) {
 	}
 
 }

@@ -47,6 +47,7 @@
 - (Session*) init: (FlutterMethodCall*)call playerManager: (FlutterSoundPlayerManager*)pm;
 - (void)isDecoderSupported:(t_CODEC)codec result: (FlutterResult)result;
 - (void)pausePlayer:(FlutterResult)result;
+- (void)flushPlayer:(FlutterResult)result;
 - (void)resumePlayer:(FlutterResult)result;
 - (void)startPlayer:(FlutterMethodCall*)path result: (FlutterResult)result;
 - (void)startPlayerFromMic:(FlutterMethodCall*)path result: (FlutterResult)result;
