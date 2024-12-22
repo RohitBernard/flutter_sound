@@ -105,7 +105,11 @@ class FlutterSoundPlayerManager extends FlutterSoundManager
                         }
                         break;
 
-
+                        case "flushPlayer":
+                        {
+                                aPlayer.flushPlayer(call, result);
+                        }
+                        break;
 
                         case "getProgress":
                         {
