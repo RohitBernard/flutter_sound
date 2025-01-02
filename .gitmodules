@@ -1,4 +1,4 @@
 [submodule "flutter_sound_core"]
 	path = flutter_sound_core
 	url = https://github.com/RohitBernard/flutter_sound_core
-	branch = feat/flush
+	branch = echo-fix
